@@ -54,24 +54,26 @@ The general quadrature problem is defined as
 
 $$\int_a^b{f(x)dx}=\sum_{i=1}^n{f(x_i)*w(x_i)}$$
 
-where $w(x_i)$ is the assigned weight of the point x.
+where $w(x_i)$ is the assigned weight of the point $x$. It follows that (generally) the more points $x$ you use in numerical integration, the higher the resolution of the integral and the more accurate the calculation. Points are generelly equidistant, so that one only has to supply the number of points desired (see below).
 ## The Midpoint Rule
-The way most people have likely been taught analytical integration is with the midpoint rule. Using the quadrature problem definition, the $w(x)$ for any $x$ is the width of the rectangle at $x$.
-## Classical Quadrature
-Using a slightly more sophisticated approach to numerical integration, we arrive at classical quadrature, which uses trapeziods instead of rectangles, but a similar divide and conquer approach.
+The way most people have likely been taught analytical integration is with the midpoint rule. With this method, for every point you construct a rectangle with its width being the distance between two points.
 
-Also similar to the midpoint rule, the weight $w(x)$ of point $x$ is the area of the trapeziod at that point.
+Using the quadrature problem definition, the $w(x)$ for any $x$ is the width of the rectangle at $x$.
+## Classical Quadrature
+Using a slightly more sophisticated approach to numerical integration, we arrive at classical quadrature, which uses trapeziods instead of rectangles (and therefore the ), but a similar divide and conquer approach.
+
+Also similar to the midpoint rule, the approximate integral of the function is the sum of the constructed trapezioids.
 """
 
 # ╔═╡ 348422df-3c14-4000-83e1-07ee1ab8176d
-@bind n html"<input type=range min=1 max=100>"
+@bind n html"<input type=range min=1 max=50>"
 
 # ╔═╡ 31d23785-61f2-4989-bacd-7d1a05a6267c
 @bind intFun html"
 <select>
-<option value='esin'>sin(e^x/2)</option>
-<option value='sin'>sin(x)</option>
+<option value='sin'>sin(e^x/2)</option>
 <option value='xsq'>x^2</option>
+<option value='cossintan'>cos(x)+sin(x^2)+tan(x/4)</option>
 </select>"
 
 # ╔═╡ 2fb221d9-8113-4834-a267-256d65348ac4
@@ -84,11 +86,12 @@ begin
 		push!(points,i,-i)
 		global i = i + width
 	end
-	rect(x1,y1,x2,y2) = [(x1,y1),(x2,y1),(x2,y2),(x1,y2),(x1,y1)], (abs(x1-x2)*y2) # return rectangle spanning defined by the two points and its area 
+	rect(x1,y1,x2,y2) = [(x1,y1),(x2,y1),(x2,y2),(x1,y2),(x1,y1)], (width*y2) # return rectangle spanning defined by the two points and its area 
 	trap(x1,y1,x2,f) = [(x1,y1),(x2,y1),(x2,f(x2)),(x1,f(x1)),(x1,y1)], (0.5*width*(f(x1)+f(x2)))
 	actualIntegral = 0
-	if (intFun == "sin")
-		f(x) = sin(x)
+	if (intFun == "cossintan")
+		f(x) = cos(x)*sin(x^2)+tan(x/4)
+		actualIntegral=0.844
 	elseif intFun == "xsq"
 		f(x) = x^2
 		actualIntegral = 83.33333
@@ -96,8 +99,8 @@ begin
 		f(x) = sin(MathConstants.e^(x/2))
 		actualIntegral = 2.83204
 	end
-	p1 = plot(f, title="Midpoint Rule")
-	p2 = plot(f, title="Classical Quadrature")
+	p1 = plot(f, title="Midpoint Rule", color="coral")
+	p2 = plot(f, title="Classical Quadrature", color="coral")
 	sumMidpoint = 0
 	sumClassical = 0
 	for j in points
@@ -113,15 +116,16 @@ end
 
 # ╔═╡ 18d69813-2cc7-469e-8bf2-25046c430e35
 md"""
+****
 Move the slider below to adjust the number of support points.
 
 Number of points: $n
 
-Actual Integral: $actualIntegral
+``\int_{-5}^{5}f(x) =`` $actualIntegral
 
-Using the midpoint rule to calculate this integral: $sumMidpoint
+Using the **midpoint** rule: $sumMidpoint
 
-With classical quadrature: $sumClassical
+With **classical quadrature**: $sumClassical
 
 """
 
@@ -937,12 +941,12 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╟─c2543166-f893-11eb-1e1e-d99a156fba84
-# ╟─7d0ff3ef-4d69-40ad-8efd-75bf0dbcf253
-# ╠═ab240825-ecd4-44cb-8f7d-05f3accdf81f
-# ╠═18d69813-2cc7-469e-8bf2-25046c430e35
+# ╠═c2543166-f893-11eb-1e1e-d99a156fba84
+# ╠═7d0ff3ef-4d69-40ad-8efd-75bf0dbcf253
+# ╟─ab240825-ecd4-44cb-8f7d-05f3accdf81f
+# ╟─18d69813-2cc7-469e-8bf2-25046c430e35
 # ╟─348422df-3c14-4000-83e1-07ee1ab8176d
 # ╟─31d23785-61f2-4989-bacd-7d1a05a6267c
-# ╠═2fb221d9-8113-4834-a267-256d65348ac4
+# ╟─2fb221d9-8113-4834-a267-256d65348ac4
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
